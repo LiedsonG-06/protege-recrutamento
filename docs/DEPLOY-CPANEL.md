@@ -79,3 +79,9 @@ Node 22.23.5: npm ci, quatro testes Node, build Vite e check-dist aprovados. Int
 Pendentes: hostname/known_hosts autenticado, autorização da pública v2, quatro Secrets e protecções GitHub, confirmação real de subsistema/permissões/quota, avaliação da actualização de dependências, autorização de push e de primeira publicação. Nenhum teste local confirma o estado real do servidor.
 
 Actualização da autenticação v2: testes de agente e integração local novamente aprovados; quatro testes Node, check-dist, sintaxe Bash/YAML e diff aprovados. Não foi necessário alterar o script remoto de backup/publicação/reversão nesta actualização.
+
+## Verificação da integração de autenticação
+
+Na revisão local, deploy-sftp.sh já carregava ssh-auth.sh e o workflow já fornecia CPANEL_SSH_PASSPHRASE; não havia ssh-keygen com passphrase vazia no percurso de publicação. Não foi verificado o estado remoto no GitHub. A publicação agora também exige socket de agente e identidade pública válidos antes do primeiro transporte.
+
+O teste `python3 scripts/test-deploy-auth.py`, incluído no job build, executa o deploy-sftp.sh real com chave fictícia protegida, ssh-agent/ssh-add reais e transportes SSH/SFTP substituídos por simuladores locais. Verifica a ligação workflow → deploy → helper, as opções de autenticação/host, ausência de credenciais no ambiente dos transportes, ordem probe/backup/upload/publicação, falhas de SSH/SFTP/passphrase, limpeza do agente e temporários e preservação das cinco configurações. Executa também a reversão numa pasta temporária. Captura stdout/stderr, inclusive com bash -x no ponto de entrada, e procura a passphrase e todas as linhas do corpo da privada sem as imprimir. Não usa nem autentica um servidor real; a correspondência da identidade real continua pendente de validação autorizada.

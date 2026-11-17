@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-set -euo pipefail
 set +x
+set -euo pipefail
 [[ "${GITHUB_RUN_ID:-}" =~ ^[0-9]+$ && "${GITHUB_RUN_ATTEMPT:-}" =~ ^[0-9]+$ ]] || exit 1
 script_dir=$(cd "$(dirname "$0")" && pwd)
 bash "$script_dir/check-dist.sh"
+# O helper carrega a chave protegida no agente e instala a limpeza EXIT/INT/TERM.
 source "$script_dir/ssh-auth.sh"
+[[ -S "$SSH_AUTH_SOCK" && -s "$work/identity.pub" ]] || exit 1
 host="protegeo@$SSH_HOST"
 release="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 # Teste do subsistema real, antes de qualquer escrita remota.

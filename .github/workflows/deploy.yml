@@ -34,6 +34,8 @@ jobs:
         run: python3 scripts/test-deploy.py
       - name: Testar autenticação SSH local sem rede
         run: python3 scripts/test-ssh-auth.py
+      - name: Testar integração deploy e agente sem rede
+        run: python3 scripts/test-deploy-auth.py
       - run: npm run build
       - name: Verificar conteúdo público
         run: bash scripts/check-dist.sh

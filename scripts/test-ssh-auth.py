@@ -43,9 +43,11 @@ printf '%s\\n%s\\n%s\\n' "$work" "$SSH_AUTH_SOCK" "$SSH_AGENT_PID" > "$RECORD"''
         record.unlink(missing_ok=True)
         env = base_env | (overrides or {})
         result = subprocess.run(['bash', str(harness)], env=env, capture_output=True, text=True, timeout=20)
-        assert result.returncode == expected, (result.returncode, result.stdout, result.stderr)
+        assert result.returncode == expected, (result.returncode, expected)
         assert secret not in result.stdout + result.stderr
         assert 'BEGIN OPENSSH PRIVATE KEY' not in result.stdout + result.stderr
+        for private_line in key.read_text().splitlines()[1:-1]:
+            assert private_line not in result.stdout + result.stderr
         assert not list(tempfiles.iterdir()), 'Temporários permaneceram após saída'
         if record.exists():
             work, sock, pid = record.read_text().splitlines()
