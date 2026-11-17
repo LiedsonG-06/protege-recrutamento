@@ -66,3 +66,7 @@ Se já existir um Chromium compatível, definir `PLAYWRIGHT_CHROMIUM_EXECUTABLE_
 Resultados e capturas ficam em `test-results/`, excluído do Git. A confirmação institucional dos anúncios e os procedimentos de acesso/conservação das candidaturas recebidas por e-mail continuam a cargo da PROTEGE.
 
 Validação da simplificação: quatro testes Node e 13 testes Playwright aprovados; build de produção concluído. Os testes antigos de API/SMTP foram removidos juntamente com essas funcionalidades.
+
+## GitHub Actions → cPanel
+
+Workflow manual em `.github/workflows/deploy.yml`: valida com Node 22 e, apenas com a opção explícita de publicação, transfere apenas `dist/` por SFTP com backup por SSH/TAR. Subsistema SFTP e permissões ainda por validar. Consultar [configuração, Secrets e primeira publicação](docs/DEPLOY-CPANEL.md). Sem execução automática por push.

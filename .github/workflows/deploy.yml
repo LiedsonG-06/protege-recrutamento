@@ -1,0 +1,71 @@
+name: Validar e publicar no cPanel
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Autorizo publicar este commit no cPanel (deixar desmarcado para apenas validar)'
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpanel-recrutamento
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Testar backup e reversão em pastas temporárias
+        run: python3 scripts/test-deploy.py
+      - name: Testar autenticação SSH local sem rede
+        run: python3 scripts/test-ssh-auth.py
+      - run: npm run build
+      - name: Verificar conteúdo público
+        run: bash scripts/check-dist.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: frontend-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    if: ${{ inputs.publish }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: cpanel-production
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: frontend-dist
+          path: dist
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          path: deploy-tools
+      - name: Verificar novamente o artefacto
+        run: bash deploy-tools/scripts/check-dist.sh
+      - name: Backup e publicação SFTP autorizada
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
+          SSH_KEY: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          SSH_PASSPHRASE: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
+          SSH_KNOWN_HOSTS: ${{ secrets.CPANEL_SSH_KNOWN_HOSTS }}
+        run: bash deploy-tools/scripts/deploy-sftp.sh
