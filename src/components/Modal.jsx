@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
-export default function Modal({ titleId, onClose, busy = false, children }) {
+export default function Modal({ titleId, onClose, children }) {
   const ref = useRef(null);
   const close = useRef(onClose);
   close.current = onClose;
@@ -32,7 +32,7 @@ export default function Modal({ titleId, onClose, busy = false, children }) {
   }, []);
   return <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
     <section className="modal" ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <button className="close-btn" onClick={onClose} disabled={busy} aria-label="Fechar janela"><X /></button>
+      <button className="close-btn" onClick={onClose} aria-label="Fechar janela"><X /></button>
       {children}
     </section>
   </div>;

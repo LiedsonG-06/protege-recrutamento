@@ -37,7 +37,7 @@ export default function JobDetails({ job, deadline, closed, onApply }) {
 
     <h3>Documentos a submeter</h3>
     <List items={job.applicationDocs}/>
-    <p className="form-hint">Pode submeter estes documentos directamente neste portal. Em alternativa, envie para <a href={`mailto:${project.email}`}>{project.email}</a> com o assunto «{job.emailSubject}».</p>
+    <p className="form-hint">Envie os documentos por e-mail para <a href={`mailto:${project.email}`}>{project.email}</a> com o assunto «{job.emailSubject}».</p>
 
     <div className="safeguarding-box">
       <strong>Recrutamento seguro</strong>

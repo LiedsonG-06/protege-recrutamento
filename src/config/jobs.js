@@ -2,6 +2,8 @@
 export const project = {
   name: 'Projecto Integrado de Recuperação Precoce e Fortalecimento da Resiliência para Comunidades Afectadas pelas Cheias na Província de Gaza, Moçambique',
   email: 'recrutamentoprotege1@gmail.com',
+  // Limite exclusivo: último minuto válido = 20/11/2026 às 23:59 de Maputo.
+  deadlineAt: '2026-11-21T00:00:00+02:00',
 };
 
 const standardDocs = [
@@ -10,8 +12,7 @@ const standardDocs = [
   'Contactos de pelo menos três referências profissionais.',
 ];
 
-// Campos usados pelo servidor: id, title, district, deadlineAt (opcional).
-// Os restantes campos alimentam a página de detalhes de cada vaga.
+// Adicionar vagas nesta lista; deadlineAt opcional substitui o prazo comum do projecto.
 export const jobs = [
   {
     id: 'campo',
@@ -255,3 +256,13 @@ export const jobs = [
     ],
   },
 ];
+
+export const districtsFor = job => job.id === 'supervisor' ? ['Massangena'] : ['Guijá', 'Mapai', 'Massangena'];
+export const deadlineFor = job => job.deadlineAt || project.deadlineAt;
+export const isJobClosed = (job, now = Date.now()) => now >= Date.parse(deadlineFor(job));
+export function formatDeadline(value) {
+  const last = new Date(Date.parse(value) - 60000);
+  const date = new Intl.DateTimeFormat('pt-MZ', { timeZone:'Africa/Maputo', day:'numeric', month:'long', year:'numeric' }).format(last).replace(/ de ([a-zà-ú])/, (match, character) => ` de ${character.toUpperCase()}`);
+  const time = new Intl.DateTimeFormat('pt-MZ', { timeZone:'Africa/Maputo', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(last);
+  return `${date}, às ${time}`;
+}
